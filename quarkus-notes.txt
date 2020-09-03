@@ -1,0 +1,8 @@
+mvn io.quarkus:quarkus-maven-plugin:1.3.4.Final-redhat-00001:create \
+    -DprojectGroupId=org.test \
+    -DprojectArtifactId=sample-quarkus \
+    -DplatformGroupId=com.redhat.quarkus \
+    -DplatformVersion=1.3.4.Final-redhat-00001 \
+    -DclassName="org.test.quickstart.TestResource" \
+    -Dpath="/hello"
+ 
