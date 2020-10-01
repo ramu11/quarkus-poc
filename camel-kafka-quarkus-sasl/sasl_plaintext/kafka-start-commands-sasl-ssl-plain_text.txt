@@ -1,0 +1,83 @@
+./zookeeper-server-start.sh /home/kkakarla/development/fuse-ocp-training-videos/kcs/amq-streams-kafka/kafka_2.12-2.5.0.redhat-00003/config/zookeeper.properties
+
+
+ ./kafka-configs.sh --zookeeper localhost:2181 --alter --add-config 'SCRAM-SHA-512=[password='admin123']' --entity-type users --entity-name admin
+Warning: --zookeeper is deprecated and will be removed in a future version of Kafka.
+Use --bootstrap-server instead to specify a broker to connect to.
+Completed updating config for entity: user-principal 'admin'.
+
+
+./kafka-configs.sh --zookeeper localhost:2181 --alter --add-config 'SCRAM-SHA-512=[password='ramu123']' --entity-type users --entity-name ramu
+Warning: --zookeeper is deprecated and will be removed in a future version of Kafka.
+Use --bootstrap-server instead to specify a broker to connect to.
+Completed updating config for entity: user-principal 'ramu'.
+
+
+export KAFKA_OPTS=-Djava.security.auth.login.config=/home/kkakarla/development/fuse-ocp-training-videos/kcs/amq-streams-kafka/kafka_2.12-2.5.0.redhat-00003/config/kafka_server_jaas.conf
+
+./bin/kafka-server-start.sh   /home/kkakarla/development/fuse-ocp-training-videos/kcs/amq-streams-kafka/kafka_2.12-2.5.0.redhat-00003/config/server.properties
+
+./bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --command-config ./config/ssl-user-config.properties --replication-factor 1 --partitions 1 --topic test-topic (will fail)
+
+./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --add --allow-principal User:ramu --operation Create --operation Describe  --topic test-topic
+Adding ACLs for resource `ResourcePattern(resourceType=TOPIC, name=test-topic, patternType=LITERAL)`: 
+ 	(principal=User:ramu, host=*, operation=DESCRIBE, permissionType=ALLOW)
+	(principal=User:ramu, host=*, operation=CREATE, permissionType=ALLOW) 
+
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=test-topic, patternType=LITERAL)`: 
+ 	(principal=User:ramu, host=*, operation=DESCRIBE, permissionType=ALLOW)
+	(principal=User:ramu, host=*, operation=CREATE, permissionType=ALLOW) 
+
+
+producer:
+./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic --producer.config config/ssl-producer.properties
+>hello
+>[2020-10-01 13:38:03,633] WARN [Producer clientId=console-producer] Error while fetching metadata with correlation id 3 : {test-topic=TOPIC_AUTHORIZATION_FAILED} (org.apache.kafka.clients.NetworkClient)
+[2020-10-01 13:38:03,635] ERROR [Producer clientId=console-producer] Topic authorization failed for topics [test-topic] (org.apache.kafka.clients.Metadata)
+[2020-10-01 13:38:03,636] ERROR Error when sending message to topic test-topic with key: null, value: 5 bytes with error: (org.apache.kafka.clients.producer.internals.ErrorLoggingCallback)
+org.apache.kafka.common.errors.TopicAuthorizationException: Not authorized to access topics: [test-topic]
+
+
+./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --add --allow-principal User:ramu --producer --topic test-topic
+Adding ACLs for resource `ResourcePattern(resourceType=TOPIC, name=test-topic, patternType=LITERAL)`: 
+ 	(principal=User:ramu, host=*, operation=DESCRIBE, permissionType=ALLOW)
+	(principal=User:ramu, host=*, operation=WRITE, permissionType=ALLOW)
+	(principal=User:ramu, host=*, operation=CREATE, permissionType=ALLOW) 
+
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=test-topic, patternType=LITERAL)`: 
+ 	(principal=User:ramu, host=*, operation=DESCRIBE, permissionType=ALLOW)
+	(principal=User:ramu, host=*, operation=CREATE, permissionType=ALLOW)
+	(principal=User:ramu, host=*, operation=WRITE, permissionType=ALLOW) 
+
+consumer:
+./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic --from-beginning --consumer.config config/ssl-consumer.properties
+[2020-09-28 15:54:54,984] ERROR Error processing message, terminating consumer process:  (kafka.tools.ConsoleConsumer$)
+org.apache.kafka.common.errors.GroupAuthorizationException: Not authorized to access group: test-consumer-group
+
+
+permissions
+./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --add --allow-principal User:ramu --consumer --topic test-topic --group test-consumer-group
+Adding ACLs for resource `ResourcePattern(resourceType=TOPIC, name=test-topic, patternType=LITERAL)`: 
+ 	(principal=User:ramu, host=*, operation=READ, permissionType=ALLOW)
+	(principal=User:ramu, host=*, operation=DESCRIBE, permissionType=ALLOW) 
+
+Adding ACLs for resource `ResourcePattern(resourceType=GROUP, name=demo-consumer-group, patternType=LITERAL)`: 
+ 	(principal=User:ramu, host=*, operation=READ, permissionType=ALLOW) 
+
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=test-topic, patternType=LITERAL)`: 
+ 	(principal=User:ramu, host=*, operation=DESCRIBE, permissionType=ALLOW)
+	(principal=User:ramu, host=*, operation=CREATE, permissionType=ALLOW)
+	(principal=User:ramu, host=*, operation=WRITE, permissionType=ALLOW)
+	(principal=User:ramu, host=*, operation=READ, permissionType=ALLOW) 
+
+Current ACLs for resource `ResourcePattern(resourceType=GROUP, name=demo-consumer-group, patternType=LITERAL)`: 
+ 	(principal=User:ramu, host=*, operation=READ, permissionType=ALLOW) 
+
+
+
+
+
+
+
+
+
