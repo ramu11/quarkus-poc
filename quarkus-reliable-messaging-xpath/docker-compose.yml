@@ -1,0 +1,33 @@
+version: "3.3"
+services:
+  prometheus:
+    image: prom/prometheus
+    volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    depends_on:
+      - app
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+
+  amq:
+    image: rmohr/activemq
+    ports:
+      - 8161:8161
+      - 61616:61616
+  app:
+    image: app
+    ports:
+    - 8080:8080
+    depends_on:
+      - amq
+
+

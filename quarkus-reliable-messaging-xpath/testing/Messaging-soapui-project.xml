@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="e98a8f12-f9eb-4e5b-a141-15fcb34b5d99" activeEnvironment="Default" name="Messaging" resourceRoot="${projectDir}" soapui-version="5.6.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:description>This SoapUI project was developed as a test harness for the Reliable Messaging/Guaranteed Message Delivery EIP using Camel on Quarkus.  
+A request/reply REST message is sent to a REST endpoint running Camel which dispatches to an ActiveMQ queue.
+An asynchronous listener (Camel Route) will dequeue the message and forward on to a request/reply REST endpoint.
+If there is an ERROR, the message will be requeued and retried for a configuration period of time and frequency.
+There is also a Mock REST Service that will act as the destination target for the messages.</con:description><con:settings/><con:interface xsi:type="con:RestService" id="58652c99-1f41-4631-a69c-d04ed9e20528" wadlVersion="http://wadl.dev.java.net/2009/02" name="http://localhost:8080" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart=""/><con:endpoints><con:endpoint>http://localhost:8080</con:endpoint></con:endpoints><con:resource name="Incoming" path="/incoming" id="5e8d1ffb-286f-4378-8ad8-9dc86d9dd528"><con:settings/><con:parameters/><con:method name="Post Message" id="ae3317f6-cb42-4ca5-bebf-7e630b61983f" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType>application/json</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:representation type="REQUEST"><con:mediaType>application/json</con:mediaType><con:params/></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="FAULT"><con:mediaType>text/html; charset=utf-8</con:mediaType><con:status>500</con:status><con:params/><con:element>html</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="REQUEST"><con:mediaType>application/xml</con:mediaType><con:params/><con:element>ORDER</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>application/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="Request" id="e4d493bc-318c-41bf-a61f-80d72210ee5e" mediaType="application/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://localhost:8080</con:endpoint><con:request><![CDATA[<ORDER>
+<WORK_ORDER_NUMBER>${=System.currentTimeMillis() + ((int)(Math.random()*10000))}</WORK_ORDER_NUMBER>
+<OPERATION_NUMBER>10</OPERATION_NUMBER>
+</ORDER>
+]]></con:request><con:originalUri>http://localhost/incoming</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource></con:interface><con:testSuite id="c663d592-7f5e-4861-badd-8134ec0964af" name="TestSuite"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase id="d4953a18-7859-4910-b830-c74dd468af9e" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Simple Message" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Post Message - Request" id="89523566-90ea-4322-8adc-d4315f9a1b4f"><con:settings/><con:config service="http://localhost:8080" resourcePath="/incoming" methodName="Post Message" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Post Message - Request" id="e4d493bc-318c-41bf-a61f-80d72210ee5e" mediaType="application/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://localhost:8081</con:endpoint><con:request><![CDATA[<ORDER>
+<ORDERID>${=System.currentTimeMillis() + ((int)(Math.random()*10000))}</ORDERID>
+<ACTIVITY>10</ACTIVITY>
+</ORDER>]]></con:request><con:originalUri>http://localhost/incoming</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:loadTest id="0ebac434-1998-4473-b75d-6be322485742" name="SimpleLoadTest"><con:settings/><con:threadCount>5</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>30</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>0</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval><con:setupScript>runner.testSuite.setPropertyValue( "rnd",((int)Math.random()*50000).toString());</con:setupScript></con:loadTest><con:properties/></con:testCase><con:properties/></con:testSuite><con:restMockService id="9e085fe1-e0ed-4b2b-961f-7c55429ff58e" port="18080" path="/" host="localhost" name="Outgoing Mock Service" docroot=""><con:settings/><con:properties/><con:restMockAction name="/outgoing" method="POST" resourcePath="/outgoing" id="ec43392c-5bb6-46e7-8332-15417ce6e3b6"><con:settings/><con:defaultResponse>Default</con:defaultResponse><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*&#13;
+// Script dispatcher is used to select a response based on the incoming request.&#13;
+// Here are few examples showing how to match based on path, query param, header and body&#13;
+&#13;
+// Match based on path&#13;
+def requestPath = mockRequest.getPath()&#13;
+log.info "Path: "+ requestPath&#13;
+&#13;
+if( requestPath.contains("json") )&#13;
+{&#13;
+    // return the name of the response you want to dispatch&#13;
+    return "JSON Response"&#13;
+}&#13;
+&#13;
+&#13;
+// Match based on query parameter&#13;
+def queryString = mockRequest.getRequest().getQueryString()&#13;
+log.info "QueryString: " + queryString&#13;
+&#13;
+if( queryString.contains("stockholm") )&#13;
+{&#13;
+    // return the name of the response you want to dispatch&#13;
+    return "Response Stockholm"&#13;
+}&#13;
+else if( queryString.contains("london") )&#13;
+{&#13;
+    // return the name of the response you want to dispatch&#13;
+    return "Response London"&#13;
+}&#13;
+&#13;
+&#13;
+// Match based on header&#13;
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")&#13;
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList&#13;
+&#13;
+if( acceptEncodingHeaderList.contains("gzip,deflate") )&#13;
+{&#13;
+    // return the name of the response you want to dispatch&#13;
+    return "GZiped Response"&#13;
+}&#13;
+&#13;
+&#13;
+// Match based on body&#13;
+def requestBody = mockRequest.getRequestContent()&#13;
+log.info "Request body: " + requestBody&#13;
+&#13;
+if( requestBody.contains("some data") )&#13;
+{&#13;
+    // return the name of the response you want to dispatch&#13;
+    return "Response N"&#13;
+}&#13;
+*/&#13;
+</con:dispatchPath><con:response name="Default" id="9521cd03-1422-4a19-9c4d-38b95d9c50f4" httpResponseStatus="200" mediaType="application/json"><con:settings/><con:responseContent>{
+  "message":"greetings"
+}</con:responseContent></con:response></con:restMockAction></con:restMockService><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:sensitiveInformation/></con:soapui-project>
